@@ -1,0 +1,23 @@
+{
+  "name": "mi-pwa",
+  "version": "1.0.0",
+  "description": "Basic PWA",
+  "main": "app.js",
+  "scripts": {
+    "start": "http-server -c-1 -p 3000 -o",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/javier-infojobs/pwa-workshop.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/javier-infojobs/pwa-workshop/issues"
+  },
+  "homepage": "https://github.com/javier-infojobs/pwa-workshop#readme",
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  }
+}
