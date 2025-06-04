@@ -7,10 +7,6 @@ const isDevelopment =
 
 self.addEventListener("install", function (event) {
   console.log("[Service Worker] Installing Service Worker ...", event);
-
-  if (isDevelopment) {
-    self.skipWaiting();
-  }
 });
 
 self.addEventListener("activate", function (event) {

@@ -231,8 +231,6 @@ Para lograr eso, requiere una **combinación de tecnologías y estándares**, co
 - Es el motor detrás de la funcionalidad offline
 - Actúa como proxy entre la aplicación y la red
 - Permite caché inteligente, notificaciones push y sincronización en segundo plano
-  
-  
 
 #### c) Web App Manifest
 
@@ -243,8 +241,6 @@ Para lograr eso, requiere una **combinación de tecnologías y estándares**, co
   - Pantalla inicial
   - Orientación predeterminada
 - Permite que la aplicación se "instale" desde el navegador
-
-
 
 ```json
 // Ejemplo de manifest.json
@@ -282,27 +278,121 @@ Para lograr eso, requiere una **combinación de tecnologías y estándares**, co
 
 #### Paso 1: Creación de proyecto
 
+Clonamos el proyecto en el directorio de preferencia:
+
+```powershell
+git clone https://github.com/javier-infojobs/pwa-workshop.git
+```
+
+Luego de clonar el proyecto, lo abrimos con VS Code.
+
+El proyecto tiene una dependencia de desarrollo, en `package.json` `devDependencies`:
+
+```json
+"devDependencies": {
+    "http-server": "^14.1.1"
+  }
+```
+
+En una terminal, ubicados en la ruta del archivo `package.json` ejecutamos:
+
+```powershell
+npm i
+```
+
 #### Paso 1: Crear archivo `manifest.json`
 
-- Guardarlo en `/manifest.json`
-- Agregar enlace en el `<head>` del HTML:
+Al clonar el proyecto ya contamos con un archivo manifest.json pero de querer crearlo, simplemente podemos crear un archivo `manifest.json` y agregar la siguiente estructura (ver las referencias del módulo 1 para más información):
+
+```json
+{
+  "name": "Mi PWA",
+  "short_name": "PWA Demo",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#000000",
+  "icons": [
+    {
+      "src": "/content/images/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ]
+}
+```
+
+Agregar enlace en el `<head>` del HTML:
 
 ```html
 <link rel="manifest" href="/manifest.json">
 ```
 
-#### Paso 2: Registrar un Service Worker (vacío por ahora)
 
-- Crear archivo `sw.js` vacío
-- Registrarlo desde el cliente:
+
+El archivo `package.json` también tiene agregado un script para ejecutar el servidor e iniciar la aplicación.
+
+```json
+"scripts": {
+    "start": "http-server -c-1 -p 3000 -o"
+  },
+```
+
+Nuevamente en la terminal, ejecutamos:
+
+```powershell
+npm run start
+```
+
+Se iniciará la aplicación en puerto `localhost:3000`.
+
+#### Paso 2: Registrar un Service Worker
+
+Al clonar el proyecto ya contamos con un archivo `sw.js` y un archivo `app.js`.
+
+En el archivo `app.js` tenemos el código para que, al iniciar el script, registre nuestro service worker.
 
 ```javascript
+
+// Registro de Service Worker
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/sw.js')
-    .then(reg => console.log('Service Worker registrado', reg))
-    .catch(err => console.error('Error al registrar SW:', err));
+    .then(reg => {
+      console.log('[App] SW registrado', reg);
+    })
+    .catch(err => console.error('[App] Error registrando SW:', err));
 }
 ```
+
+
+
+En el archivo `sw.js` nos suscribimos al evento `install` y escribimos en consola.
+
+```javascript
+self.addEventListener("install", function (event) {
+  console.log("[Service Worker] Installing Service Worker ...", event);
+
+  if (isDevelopment) {
+    self.skipWaiting();
+  }
+});
+```
+
+Luego mostramos otro log al activarse el service worker suscribiendonos al evento `activate`:
+
+```javascript
+
+self.addEventListener("activate", function (event) {
+  console.log("[Service Worker] Activating Service Worker ....", event);
+  return self.clients.claim();
+});
+```
+
+El `return self.clients.claim();` lo que hace es:
+
+- El SW activo **se "autoproclama" controlador** (claim) de todas las pestañas y ventanas abiertas dentro de su scope.
+
+- Así, el SW empieza a interceptar las peticiones de esas páginas inmediatamente, sin esperar recarga.
 
 #### Paso 3: Probar con Lighthouse
 
@@ -323,30 +413,50 @@ Crear una estructura mínima funcional de PWA con:
 ### Instrucciones:
 
 1. Crea una carpeta llamada `mi-pwa`.
-2. Dentro, crea:
-   - `index.html`
-   - `manifest.json`
-   - `sw.js`
-   - Un icono PNG de 192x192px
-3. Registra el Service Worker.
-4. Abre la página en Chrome y usa **Lighthouse** para comprobar si tu sitio cumple con los criterios básicos de PWA.
+2. Dentro, sigue la estructura:
+   
+   ```
+   /mi-proyecto
+     └── /public
+          ├── /content
+          |    ├── /images
+          │    |     └── icon-192x192.png
+          |    ├── /js
+          │    |     └── app.js
+          |    └── /css
+          │          └── styles.css
+          ├── index.html
+          ├── manifest.json
+          └── sw.js
+   ```
+3. Crea el archivo `package.json` utilizando el comando `npm init` sobre el directorio `mi-proyecto`
+4. Registra el Service Worker.
+5. Abre la página en Chrome y usa **Lighthouse** para comprobar si tu sitio cumple con los criterios básicos de PWA.
 
 ## Resumen del módulo
 
-| Concepto | Descripción |
-||-|
-| PWA | Aplicación web que ofrece experiencia nativa |
-| Ventajas | Offline, instalable, rápida, segura, indexable |
-| Componentes | HTTPS, Web App Manifest, Service Worker |
-| Herramientas | VSCode, servidor local, Lighthouse |
-| Práctica | Configurar estructura básica de PWA |
+Código completo del Módulo 1:
+
+```
+https://github.com/javier-infojobs/pwa-workshop/tree/mod-1/completed
+```
+
+| Concepto     | Descripción                                    |
+| ------------ | ---------------------------------------------- |
+| PWA          | Aplicación web que ofrece experiencia nativa   |
+| Ventajas     | Offline, instalable, rápida, segura, indexable |
+| Componentes  | HTTPS, Web App Manifest, Service Worker        |
+| Herramientas | VSCode, servidor local, Lighthouse             |
+| Práctica     | Configurar estructura básica de PWA            |
 
 ## Recursos recomendados
 
-- [MDN Web Docs – PWA](https://developer.mozilla.org/es/docs/Web/Progressive_web_apps)
-- [Google Developers – PWA](https://developers.google.com/web/progressive-web-apps/)
-- [Web.dev – Fundamentos de PWA](https://web.dev/learn/pwa/)
-- [Lighthouse Audit](https://developer.chrome.com/docs/lighthouse/overview/)
+- [1 | *MDN Web Docs – PWA*](https://developer.mozilla.org/es/docs/Web/Progressive_web_apps)
+- [2| *Google Developers – PWA*](https://developers.google.com/web/progressive-web-apps/)
+- [3| *Web.dev – Fundamentos de PWA*](https://web.dev/learn/pwa/)
+- [4| *Lighthouse Audit*](https://developer.chrome.com/docs/lighthouse/overview/)
+- [5| *Web application manifest - Progressive web apps | MDN*](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Manifest)
+- [6| *Agrega un manifiesto de aplicación web | Articles | web.dev*](https://web.dev/articles/add-manifest?hl=es-419)
 
 # MÓDULO 2: Fundamentos de los Service Workers
 
